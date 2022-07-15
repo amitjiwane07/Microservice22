@@ -1,0 +1,49 @@
+server:
+  port: 9595
+  
+spring:
+  application:
+    name: api-gateway
+    
+  cloud:
+    gateway:
+      routes:
+      - id: laptop-service
+        uri: lb://laptop-service
+        predicates:
+        - Path=/laptop/**
+        filters:
+        - name: CircuitBreaker
+          args:
+            name: laptop-service
+            fallbackuri: forward:/laptopServiceFallBack
+        
+        
+      - id: employee-service
+        uri: lb://employee-service
+        predicates:
+        - Path=/employee/**
+        filters:
+        - name: CircuitBreaker
+          args:
+            name: employee-service
+            fallbackuri: forward:/employeeServiceFallBack
+            
+            
+hystrix:
+  command:
+    fallbackcmd:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 4000
+       
+management:
+  endpoints:
+    web:
+      exposure:
+        include: hystrix.stream
+            
+            
+               
+ 
